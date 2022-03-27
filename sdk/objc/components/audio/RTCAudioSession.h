@@ -99,6 +99,9 @@ RTC_OBJC_EXPORT
     failedToSetActive:(BOOL)active
                 error:(NSError *)error;
 
+/** Called when audio session changed from output-only to input & output */
+- (void)audioSessionDidChangeRecordingEnabled:(RTC_OBJC_TYPE(RTCAudioSession) *)audioSession;
+
 @end
 
 /** This is a protocol used to inform RTCAudioSession when the audio session
@@ -137,8 +140,6 @@ RTC_OBJC_EXPORT
  *  AVAudioSession.
  */
 @property(nonatomic, readonly) BOOL isActive;
-/** Whether RTCAudioSession is currently locked for configuration. */
-@property(nonatomic, readonly) BOOL isLocked;
 
 /** If YES, WebRTC will not initialize the audio unit automatically when an
  *  audio track is ready for playout or recording. Instead, applications should

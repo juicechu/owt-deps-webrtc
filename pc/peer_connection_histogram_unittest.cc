@@ -19,7 +19,6 @@
 #include "api/jsep.h"
 #include "api/jsep_session_description.h"
 #include "api/peer_connection_interface.h"
-#include "api/peer_connection_proxy.h"
 #include "api/rtc_error.h"
 #include "api/scoped_refptr.h"
 #include "api/task_queue/default_task_queue_factory.h"
@@ -29,6 +28,7 @@
 #include "p2p/client/basic_port_allocator.h"
 #include "pc/peer_connection.h"
 #include "pc/peer_connection_factory.h"
+#include "pc/peer_connection_proxy.h"
 #include "pc/peer_connection_wrapper.h"
 #include "pc/sdp_utils.h"
 #include "pc/test/mock_peer_connection_observers.h"
@@ -497,7 +497,7 @@ TEST_F(PeerConnectionUsageHistogramTest, FingerprintWithMdnsCallee) {
                                                  expected_fingerprint_callee));
 }
 
-#ifdef HAVE_SCTP
+#ifdef WEBRTC_HAVE_SCTP
 TEST_F(PeerConnectionUsageHistogramTest, FingerprintDataOnly) {
   auto caller = CreatePeerConnection();
   auto callee = CreatePeerConnection();
@@ -521,15 +521,15 @@ TEST_F(PeerConnectionUsageHistogramTest, FingerprintDataOnly) {
           expected_fingerprint |
               static_cast<int>(UsageEvent::PRIVATE_CANDIDATE_COLLECTED)) == 2);
 }
-#endif  // HAVE_SCTP
+#endif  // WEBRTC_HAVE_SCTP
 #endif  // WEBRTC_ANDROID
 
 TEST_F(PeerConnectionUsageHistogramTest, FingerprintStunTurn) {
   RTCConfiguration configuration;
   PeerConnection::IceServer server;
-  server.urls = {"stun:dummy.stun.server/"};
+  server.urls = {"stun:dummy.stun.server"};
   configuration.servers.push_back(server);
-  server.urls = {"turn:dummy.turn.server/"};
+  server.urls = {"turn:dummy.turn.server"};
   server.username = "username";
   server.password = "password";
   configuration.servers.push_back(server);
@@ -547,9 +547,9 @@ TEST_F(PeerConnectionUsageHistogramTest, FingerprintStunTurn) {
 TEST_F(PeerConnectionUsageHistogramTest, FingerprintStunTurnInReconfiguration) {
   RTCConfiguration configuration;
   PeerConnection::IceServer server;
-  server.urls = {"stun:dummy.stun.server/"};
+  server.urls = {"stun:dummy.stun.server"};
   configuration.servers.push_back(server);
-  server.urls = {"turn:dummy.turn.server/"};
+  server.urls = {"turn:dummy.turn.server"};
   server.username = "username";
   server.password = "password";
   configuration.servers.push_back(server);
@@ -628,7 +628,7 @@ TEST_F(PeerConnectionUsageHistogramTest, FingerprintWithPrivateIpv6Callee) {
 }
 
 #ifndef WEBRTC_ANDROID
-#ifdef HAVE_SCTP
+#ifdef WEBRTC_HAVE_SCTP
 // Test that the usage pattern bits for adding remote (private IPv6) candidates
 // are set when the remote candidates are retrieved from the Offer SDP instead
 // of trickled ICE messages.

@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property(nonatomic, assign) BOOL isInterrupted;
 
-- (BOOL)checkLock:(NSError **)outError;
+@property(nonatomic, strong) NSString *activeCategory;
 
 /** Adds the delegate to the list of delegates, and places it at the front of
  *  the list. This delegate will be notified before other delegates of

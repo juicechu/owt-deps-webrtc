@@ -72,9 +72,12 @@ static OSStatus GetAGCState(AudioUnit audio_unit, UInt32* enabled) {
   return result;
 }
 
-VoiceProcessingAudioUnit::VoiceProcessingAudioUnit(
-    VoiceProcessingAudioUnitObserver* observer)
-    : observer_(observer), vpio_unit_(nullptr), state_(kInitRequired) {
+VoiceProcessingAudioUnit::VoiceProcessingAudioUnit(bool bypass_voice_processing,
+                                                   VoiceProcessingAudioUnitObserver* observer)
+    : bypass_voice_processing_(bypass_voice_processing),
+      observer_(observer),
+      vpio_unit_(nullptr),
+      state_(kInitRequired) {
   RTC_DCHECK(observer);
 }
 
@@ -106,19 +109,6 @@ bool VoiceProcessingAudioUnit::Init() {
   if (result != noErr) {
     vpio_unit_ = nullptr;
     RTCLogError(@"AudioComponentInstanceNew failed. Error=%ld.", (long)result);
-    return false;
-  }
-
-  // Enable input on the input scope of the input element.
-  UInt32 enable_input = 1;
-  result = AudioUnitSetProperty(vpio_unit_, kAudioOutputUnitProperty_EnableIO,
-                                kAudioUnitScope_Input, kInputBus, &enable_input,
-                                sizeof(enable_input));
-  if (result != noErr) {
-    DisposeAudioUnit();
-    RTCLogError(@"Failed to enable input on input scope of input element. "
-                 "Error=%ld.",
-                (long)result);
     return false;
   }
 
@@ -202,6 +192,27 @@ bool VoiceProcessingAudioUnit::Initialize(Float64 sample_rate) {
   LogStreamDescription(format);
 #endif
 
+  // Enable input on the input scope of the input element.
+  // keep it disabled if audio session is configured for playback only
+  AVAudioSession* session = [AVAudioSession sharedInstance];
+  UInt32 enable_input = 0;
+  if ([session.category isEqualToString: AVAudioSessionCategoryPlayAndRecord] ||
+      [session.category isEqualToString: AVAudioSessionCategoryRecord]) {
+    enable_input = 1;
+  }
+  RTCLog(@"Initializing AudioUnit, category=%@, enable_input=%s", session.category, (enable_input == 1) ? "true" : "false");
+  // LOGI() << "Initialize" << session.category << ", enable_input=" << enable_input;
+  result = AudioUnitSetProperty(vpio_unit_, kAudioOutputUnitProperty_EnableIO,
+                                kAudioUnitScope_Input, kInputBus, &enable_input,
+                                sizeof(enable_input));
+  if (result != noErr) {
+    DisposeAudioUnit();
+    RTCLogError(@"Failed to enable input on input scope of input element. "
+                 "Error=%ld.",
+                (long)result);
+    return false;
+  }
+
   // Set the format on the output scope of the input element/bus.
   result =
       AudioUnitSetProperty(vpio_unit_, kAudioUnitProperty_StreamFormat,
@@ -248,6 +259,24 @@ bool VoiceProcessingAudioUnit::Initialize(Float64 sample_rate) {
   }
   if (result == noErr) {
     RTCLog(@"Voice Processing I/O unit is now initialized.");
+  }
+
+  if (bypass_voice_processing_) {
+    // Attempt to disable builtin voice processing.
+    UInt32 toggle = 1;
+    result = AudioUnitSetProperty(vpio_unit_,
+                                  kAUVoiceIOProperty_BypassVoiceProcessing,
+                                  kAudioUnitScope_Global,
+                                  kInputBus,
+                                  &toggle,
+                                  sizeof(toggle));
+    if (result == noErr) {
+      RTCLog(@"Successfully bypassed voice processing.");
+    } else {
+      RTCLogError(@"Failed to bypass voice processing. Error=%ld.", (long)result);
+    }
+    state_ = kInitialized;
+    return true;
   }
 
   // AGC should be enabled by default for Voice Processing I/O units but it is

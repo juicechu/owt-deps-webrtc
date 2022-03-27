@@ -43,9 +43,6 @@
   if (outError) {
     *outError = nil;
   }
-  if (![self checkLock:outError]) {
-    return NO;
-  }
 
   // Provide an error even if there isn't one so we can log it. We will not
   // return immediately on error in this function and instead try to set
@@ -58,7 +55,8 @@
     if (![self setCategory:configuration.category
                withOptions:configuration.categoryOptions
                      error:&categoryError]) {
-      RTCLogError(@"Failed to set category: %@",
+      RTCLogError(@"Failed to set category to %@: %@",
+                  self.category,
                   categoryError.localizedDescription);
       error = categoryError;
     } else {
@@ -69,7 +67,8 @@
   if (self.mode != configuration.mode) {
     NSError *modeError = nil;
     if (![self setMode:configuration.mode error:&modeError]) {
-      RTCLogError(@"Failed to set mode: %@",
+      RTCLogError(@"Failed to set mode to %@: %@",
+                  self.mode,
                   modeError.localizedDescription);
       error = modeError;
     } else {

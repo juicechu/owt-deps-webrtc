@@ -41,6 +41,13 @@ RTC_OBJC_EXPORT
     initWithEncoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoEncoderFactory)>)encoderFactory
             decoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoDecoderFactory)>)decoderFactory;
 
+/* Initialize object with bypass voice processing */
+- (instancetype)
+    initWithBypassVoiceProcessing:(BOOL)bypassVoiceProcessing
+                   encoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoEncoderFactory)>)encoderFactory
+                   decoderFactory:
+                       (nullable id<RTC_OBJC_TYPE(RTCVideoDecoderFactory)>)decoderFactory;
+
 /** Initialize an RTCAudioSource with constraints. */
 - (RTC_OBJC_TYPE(RTCAudioSource) *)audioSourceWithConstraints:
     (nullable RTC_OBJC_TYPE(RTCMediaConstraints) *)constraints;
@@ -70,7 +77,7 @@ RTC_OBJC_EXPORT
 /** Initialize an RTCPeerConnection with a configuration, constraints, and
  *  delegate.
  */
-- (RTC_OBJC_TYPE(RTCPeerConnection) *)
+- (nullable RTC_OBJC_TYPE(RTCPeerConnection) *)
     peerConnectionWithConfiguration:(RTC_OBJC_TYPE(RTCConfiguration) *)configuration
                         constraints:(RTC_OBJC_TYPE(RTCMediaConstraints) *)constraints
                            delegate:(nullable id<RTC_OBJC_TYPE(RTCPeerConnectionDelegate)>)delegate;

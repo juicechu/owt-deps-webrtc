@@ -71,10 +71,14 @@ bool IsWindowMaximized(HWND window, bool* result);
 // visible, and that it is not minimized.
 bool IsWindowValidAndVisible(HWND window);
 
+// Checks if a window responds to a message within 50ms.
+bool IsWindowResponding(HWND window);
+
 enum GetWindowListFlags {
   kNone = 0x00,
   kIgnoreUntitled = 1 << 0,
   kIgnoreUnresponsive = 1 << 1,
+  kIgnoreCurrentProcessWindows = 1 << 2,
 };
 
 // Retrieves the list of top-level windows on the screen.
@@ -82,9 +86,13 @@ enum GetWindowListFlags {
 // - Those that are invisible or minimized.
 // - Program Manager & Start menu.
 // - [with kIgnoreUntitled] windows with no title.
-// - [with kIgnoreUnresponsive] windows that unresponsive.
+// - [with kIgnoreUnresponsive] windows that are unresponsive.
+// - [with kIgnoreCurrentProcessWindows] windows owned by the current process.
+// - Any windows with extended styles that match |ex_style_filters|.
 // Returns false if native APIs failed.
-bool GetWindowList(int flags, DesktopCapturer::SourceList* windows);
+bool GetWindowList(int flags,
+                   DesktopCapturer::SourceList* windows,
+                   LONG ex_style_filters = 0);
 
 typedef HRESULT(WINAPI* DwmIsCompositionEnabledFunc)(BOOL* enabled);
 typedef HRESULT(WINAPI* DwmGetWindowAttributeFunc)(HWND hwnd,
@@ -104,7 +112,13 @@ class WindowCaptureHelperWin {
   bool IsWindowOnCurrentDesktop(HWND hwnd);
   bool IsWindowVisibleOnCurrentDesktop(HWND hwnd);
   bool IsWindowCloaked(HWND hwnd);
-  bool EnumerateCapturableWindows(DesktopCapturer::SourceList* results);
+
+  // The optional |ex_style_filters| parameter allows callers to provide
+  // extended window styles (e.g. WS_EX_TOOLWINDOW) and prevent windows that
+  // match from being included in |results|.
+  bool EnumerateCapturableWindows(DesktopCapturer::SourceList* results,
+                                  bool enumerate_current_process_windows,
+                                  LONG ex_style_filters = 0);
 
  private:
   HMODULE dwmapi_library_ = nullptr;

@@ -72,11 +72,16 @@ NS_ASSUME_NONNULL_BEGIN
     initWithEncoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoEncoderFactory)>)encoderFactory
             decoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoDecoderFactory)>)decoderFactory;
 
+- (instancetype)
+    initWithBypassVoiceProcessing:(BOOL)bypassVoiceProcessing
+                   encoderFactory:(nullable id<RTC_OBJC_TYPE(RTCVideoEncoderFactory)>)encoderFactory
+                   decoderFactory:
+                       (nullable id<RTC_OBJC_TYPE(RTCVideoDecoderFactory)>)decoderFactory;
 
 /** Initialize an RTCPeerConnection with a configuration, constraints, and
  *  dependencies.
  */
-- (RTC_OBJC_TYPE(RTCPeerConnection) *)
+- (nullable RTC_OBJC_TYPE(RTCPeerConnection) *)
     peerConnectionWithDependencies:(RTC_OBJC_TYPE(RTCConfiguration) *)configuration
                        constraints:(RTC_OBJC_TYPE(RTCMediaConstraints) *)constraints
                       dependencies:(std::unique_ptr<webrtc::PeerConnectionDependencies>)dependencies

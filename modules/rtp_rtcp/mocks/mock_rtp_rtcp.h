@@ -34,6 +34,7 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
               (const uint8_t* incoming_packet, size_t packet_length),
               (override));
   MOCK_METHOD(void, SetRemoteSSRC, (uint32_t ssrc), (override));
+  MOCK_METHOD(void, SetLocalSsrc, (uint32_t ssrc), (override));
   MOCK_METHOD(void, SetMaxRtpPacketSize, (size_t size), (override));
   MOCK_METHOD(size_t, MaxRtpPacketSize, (), (const, override));
   MOCK_METHOD(void,
@@ -141,16 +142,14 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
               GetSendStreamDataCounters,
               (StreamDataCounters*, StreamDataCounters*),
               (const, override));
-  MOCK_METHOD(int32_t,
-              RemoteRTCPStat,
-              (std::vector<RTCPReportBlock> * receive_blocks),
-              (const, override));
   MOCK_METHOD(std::vector<ReportBlockData>,
               GetLatestReportBlockData,
               (),
               (const, override));
-  MOCK_METHOD(void, SetRtcpXrRrtrStatus, (bool enable), (override));
-  MOCK_METHOD(bool, RtcpXrRrtrStatus, (), (const, override));
+  MOCK_METHOD(absl::optional<SenderReportStats>,
+              GetSenderReportStats,
+              (),
+              (const, override));
   MOCK_METHOD(void,
               SetRemb,
               (int64_t bitrate, std::vector<uint32_t> ssrcs),
@@ -168,7 +167,6 @@ class MockRtpRtcpInterface : public RtpRtcpInterface {
               SetStorePacketsStatus,
               (bool enable, uint16_t number_to_store),
               (override));
-  MOCK_METHOD(bool, StorePackets, (), (const, override));
   MOCK_METHOD(void,
               SendCombinedRtcpPacket,
               (std::vector<std::unique_ptr<rtcp::RtcpPacket>> rtcp_packets),

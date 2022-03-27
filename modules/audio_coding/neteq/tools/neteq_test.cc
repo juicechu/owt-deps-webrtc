@@ -51,12 +51,12 @@ void DefaultNetEqTestErrorCallback::OnInsertPacketError(
     const NetEqInput::PacketData& packet) {
   std::cerr << "InsertPacket returned an error." << std::endl;
   std::cerr << "Packet data: " << packet.ToString() << std::endl;
-  FATAL();
+  RTC_FATAL();
 }
 
 void DefaultNetEqTestErrorCallback::OnGetAudioError() {
   std::cerr << "GetAudio returned an error." << std::endl;
-  FATAL();
+  RTC_FATAL();
 }
 
 NetEqTest::NetEqTest(const NetEq::Config& config,
@@ -172,7 +172,7 @@ NetEqTest::SimulationStepResult NetEqTest::RunToNextGetAudio() {
       }
       AudioFrame out_frame;
       bool muted;
-      int error = neteq_->GetAudio(&out_frame, &muted,
+      int error = neteq_->GetAudio(&out_frame, &muted, nullptr,
                                    ActionToOperations(next_action_));
       next_action_ = absl::nullopt;
       RTC_CHECK(!muted) << "The code does not handle enable_muted_state";

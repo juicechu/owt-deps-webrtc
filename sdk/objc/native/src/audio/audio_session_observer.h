@@ -32,6 +32,8 @@ class AudioSessionObserver {
 
   virtual void OnChangedOutputVolume() = 0;
 
+  virtual void OnChangedRecordingEnabled() = 0;
+
  protected:
   virtual ~AudioSessionObserver() {}
 };

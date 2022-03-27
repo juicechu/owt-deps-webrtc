@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env vpython
 # Copyright (c) 2019 The WebRTC project authors. All Rights Reserved.
 #
 # Use of this source code is governed by a BSD-style license
@@ -20,6 +20,11 @@ there. It needs to be here source-side.
 import argparse
 import os
 import sys
+
+# Even if protobuf is not used directly, this allows transitive imports
+# of the protobuf library to use the vpython wheel specified in the root
+# level .vpython (see bugs.webrtc.org/12211 for context).
+import google.protobuf  # pylint: disable=unused-import
 
 
 def _CreateParser():
@@ -45,7 +50,8 @@ def _CreateParser():
                         help='Which dashboard to use.')
     parser.add_argument('--input-results-file', type=argparse.FileType(),
                         required=True,
-                        help='A JSON file with output from WebRTC tests.')
+                        help='A HistogramSet proto file with output from '
+                        'WebRTC tests.')
     parser.add_argument('--output-json-file', type=argparse.FileType('w'),
                         help='Where to write the output (for debugging).')
     parser.add_argument('--outdir', required=True,
