@@ -174,6 +174,9 @@ declare_args() {
     rtc_apprtcmobile_broadcast_extension = false
   }
 
+  rtc_ios_macos_use_opengl_rendering =
+      !(is_ios && target_environment == "catalyst")
+
   # Determines whether Metal is available on iOS/macOS.
   rtc_use_metal_rendering = is_mac || (is_ios && current_cpu == "arm64")
 

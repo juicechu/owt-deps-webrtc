@@ -53,7 +53,8 @@ ScopedJavaLocalRef<jobject> NativeToJavaRtpEncodingParameter(
       NativeToJavaInteger(env, encoding.max_framerate),
       NativeToJavaInteger(env, encoding.num_temporal_layers),
       NativeToJavaDouble(env, encoding.scale_resolution_down_by),
-      encoding.ssrc ? NativeToJavaLong(env, *encoding.ssrc) : nullptr);
+      encoding.ssrc ? NativeToJavaLong(env, *encoding.ssrc) : nullptr,
+      encoding.adaptive_ptime);
 }
 
 ScopedJavaLocalRef<jobject> NativeToJavaRtpCodecParameter(

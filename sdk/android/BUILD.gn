@@ -43,6 +43,7 @@ if (is_android) {
       ":filevideo_java",
       ":hwcodecs_java",
       ":java_audio_device_module_java",
+      ":libaom_av1_java",
       ":libjingle_peerconnection_java",
       ":libjingle_peerconnection_metrics_default_java",
       ":libvpx_vp8_java",
@@ -241,6 +242,7 @@ if (is_android) {
       "src/java/org/webrtc/GlGenericDrawer.java",
       "src/java/org/webrtc/H264Utils.java",
       "src/java/org/webrtc/NV21Buffer.java",
+      "src/java/org/webrtc/VideoCodecMimeType.java",
       "src/java/org/webrtc/VideoDecoderWrapper.java",
       "src/java/org/webrtc/VideoEncoderWrapper.java",
       "src/java/org/webrtc/WrappedNativeI420Buffer.java",
@@ -426,6 +428,7 @@ if (is_android) {
     visibility = [ "*" ]
     sources = [
       "api/org/webrtc/audio/JavaAudioDeviceModule.java",
+      "src/java/org/webrtc/audio/LowLatencyAudioBufferManager.java",
       "src/java/org/webrtc/audio/VolumeLogger.java",
       "src/java/org/webrtc/audio/WebRtcAudioEffects.java",
       "src/java/org/webrtc/audio/WebRtcAudioManager.java",
@@ -507,6 +510,20 @@ if (is_android) {
     ]
   }
 
+  rtc_android_library("libaom_av1_java") {
+    visibility = [ "*" ]
+    sources = [
+      "api/org/webrtc/LibaomAv1Decoder.java",
+      "api/org/webrtc/LibaomAv1Encoder.java",
+    ]
+    deps = [
+      ":base_java",
+      ":video_api_java",
+      ":video_java",
+      "../../rtc_base:base_java",
+    ]
+  }
+
   rtc_android_library("swcodecs_java") {
     visibility = [ "*" ]
     sources = [
@@ -516,6 +533,7 @@ if (is_android) {
 
     deps = [
       ":base_java",
+      ":libaom_av1_java",
       ":libvpx_vp8_java",
       ":libvpx_vp9_java",
       ":video_api_java",
@@ -1535,6 +1553,7 @@ if (is_android) {
       "tests/src/org/webrtc/IceCandidateTest.java",
       "tests/src/org/webrtc/RefCountDelegateTest.java",
       "tests/src/org/webrtc/ScalingSettingsTest.java",
+      "tests/src/org/webrtc/audio/LowLatencyAudioBufferManagerTest.java",
     ]
 
     deps = [

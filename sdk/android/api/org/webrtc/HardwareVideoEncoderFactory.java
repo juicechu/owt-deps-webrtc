@@ -99,7 +99,7 @@ public class HardwareVideoEncoderFactory implements VideoEncoderFactory {
       return null;
     }
 
-    VideoCodecMimeType type = VideoCodecMimeType.valueOf(input.name);
+    VideoCodecMimeType type = VideoCodecMimeType.fromSdpCodecName(input.getName());
     MediaCodecInfo info = findCodecForType(type);
 
     if (info == null) {
@@ -142,13 +142,13 @@ public class HardwareVideoEncoderFactory implements VideoEncoderFactory {
 
     List<VideoCodecInfo> supportedCodecInfos = new ArrayList<VideoCodecInfo>();
     // Generate a list of supported codecs in order of preference:
-    // VP8, VP9, H.265(optional), H264 (high profile), and H264 (baseline profile).
-    for (VideoCodecMimeType type : new VideoCodecMimeType[] {
-             VideoCodecMimeType.VP8, VideoCodecMimeType.VP9, VideoCodecMimeType.H264,
-			     VideoCodecMimeType.H265}) {
+    // VP8, VP9, H.265(optional), H264 (high profile), H264 (baseline profile) and AV1.
+    for (VideoCodecMimeType type : new VideoCodecMimeType[] {VideoCodecMimeType.VP8,
+             VideoCodecMimeType.VP9, VideoCodecMimeType.H264, VideoCodecMimeType.H265,
+             VideoCodecMimeType.AV1}) {
       MediaCodecInfo codec = findCodecForType(type);
       if (codec != null) {
-        String name = type.name();
+        String name = type.toSdpCodecName();
         // TODO(sakal): Always add H264 HP once WebRTC correctly removes codecs that are not
         // supported by the decoder.
         if (type == VideoCodecMimeType.H264 && isH264HighProfileSupported(codec)) {
@@ -210,6 +210,8 @@ public class HardwareVideoEncoderFactory implements VideoEncoderFactory {
         return isHardwareSupportedInCurrentSdkH264(info);
       case H265:
         return isHardwareSupportedInCurrentSdkH265(info);
+      case AV1:
+        return false;
     }
     return false;
   }
@@ -255,16 +257,16 @@ public class HardwareVideoEncoderFactory implements VideoEncoderFactory {
   }
 
   private boolean isHardwareSupportedInCurrentSdkH265(MediaCodecInfo info) {
-    String name = info.getName();
-    // QCOM H265 encoder is supported in KITKAT or later.
-    return (name.startsWith(QCOM_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-           // Exynos H265 encoder is supported in LOLLIPOP or later.
-           || (name.startsWith(EXYNOS_PREFIX)
-               && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-           // Hisi VP8 encoder seems to be supported. Needs more testing.
-           || (name.startsWith(HISI_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-           || (name.startsWith(IMG_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-           || vcp.isExtraHardwareSupported(name, "video/hevc", vcp.parseWithTag(vcp.loadWithDom(extraMediaCodecFile), "Decoders"));
+      String name = info.getName();
+      // QCOM H265 encoder is supported in KITKAT or later.
+      return (name.startsWith(QCOM_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+          // Exynos H265 encoder is supported in LOLLIPOP or later.
+          || (name.startsWith(EXYNOS_PREFIX)
+                  && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+          // Hisi VP8 encoder seems to be supported. Needs more testing.
+          || (name.startsWith(HISI_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+          || (name.startsWith(IMG_PREFIX) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+          || vcp.isExtraHardwareSupported(name, "video/hevc", vcp.parseWithTag(vcp.loadWithDom(extraMediaCodecFile), "Decoders"));
   }
 
   private boolean isMediaCodecAllowed(MediaCodecInfo info) {
@@ -278,6 +280,7 @@ public class HardwareVideoEncoderFactory implements VideoEncoderFactory {
     switch (type) {
       case VP8: // Fallthrough intended.
       case VP9:
+      case AV1:
         return 100;
       case H264:
       case H265:
